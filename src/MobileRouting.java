@@ -22,6 +22,7 @@ public class MobileRouting extends Node {
     boolean firstclock = true;
     boolean receivemsg = false;
     boolean done = false;
+    boolean firstmode2 = true;
     Message m = null;
     int k = 0;
     int n = 0;
@@ -56,7 +57,7 @@ public class MobileRouting extends Node {
         		System.out.println("My ID: "+this.getID()+" Clock");
 	            List<Integer> list = new ArrayList<Integer>();
 	            list.add(this.getID()); //msg
-	            list.add(23); //destination
+	            list.add(10); //destination
 	            list.add(1); //mode
         		Message m = new Message(list);
 	            
@@ -69,13 +70,13 @@ public class MobileRouting extends Node {
     }
 
     @SuppressWarnings("unchecked")
-	public void receive(Message message) {
+	public void receive(Message message, boolean linkChange) {
 		become("RECEIVED");
-    	m = message;
-    	sender = message.getSender();
-    	msgcontent = ((ArrayList<Integer>)message.getContent()).get(0);
-    	destID = ((ArrayList<Integer>)message.getContent()).get(1);
-    	modemsg = ((ArrayList<Integer>)message.getContent()).get(2);
+    	m = linkChange? m : message;
+    	sender = linkChange? null : message.getSender();
+    	msgcontent = linkChange? msgcontent : ((ArrayList<Integer>)message.getContent()).get(0);
+    	destID = linkChange? destID : ((ArrayList<Integer>)message.getContent()).get(1);
+    	modemsg = linkChange? modemsg : ((ArrayList<Integer>)message.getContent()).get(2);
     	receivemsg = true;
     }
     
@@ -107,31 +108,27 @@ public class MobileRouting extends Node {
     		this.setColor(Color.black);
     	}
     }
-    public void CounterFlooding() {
-    	if (k < n*2) {
-	    	broadcast();
-	    	k += 1;
-    	} else {
-    		become("DONE");
-    	}
-    }
     
 	@Override
     public void onMessage(Message message) {
     	super.onMessage(message);
     	System.out.println("My ID: "+this.getID()+" RCVD: "+message.toString());
-    	onMessageOrLinkChange(message);
+    	onMessageOrLinkChange(message, false);
     }
-    public void onMessageOrLinkChange(Message message) {		
+    public void onMessageOrLinkChange(Message message, boolean linkChange) {		
 		if (mode == 0) {
-			receive(message);
+			receive(message, linkChange);
 			n = destID + 1;
-			if ((modemsg == 1 && this.getID() == destID)||(modemsg == 2))
+			if ((modemsg == 1 && this.getID() == destID)||(modemsg == 2)) {
+				System.out.println("***********************************");
+				System.out.println("*******DESTINATION RECEIVED********");
+				System.out.println("***********************************");
 				mode = 2;
-			else
+			} else {
 				generateMsg(1);
 				broadcast();
 				mode = 1;
+			}
 		} else if (mode == 1) {
 			//on link change
 			if (message == null) {
@@ -139,7 +136,7 @@ public class MobileRouting extends Node {
 				generateMsg(1);
 				broadcast();
 			}
-			receive(message);
+			receive(message, linkChange);
 			if (modemsg == 1 && destID > n) {
 				n = destID;
 				generateMsg(1);
@@ -151,14 +148,19 @@ public class MobileRouting extends Node {
 		} else if (mode == 2) {
 			//process/delete message locally
 			generateMsg(2);
-			CounterFlooding();
-			receive(message);
-			if (n > destID) {
-				n = destID;
-				CounterFlooding();
+			if (firstmode2) {
+				CounterFloodingMethod();
+				receive(message, linkChange);
+				firstmode2 = false;
+			} else {
+				receive(message, linkChange);
+				if (n > destID) {
+					n = destID;
+					CounterFloodingMethod();
+				}
 			}
 		}
-		if (done) {
+		if (done && !linkChange) {
     		System.out.println("*** DONE, ID " + this.getID() + " ***");
     		System.out.println("*** TOTAL NUMBER OF MESSAGES ***");
     		System.out.println(this.getTotalMessages());
@@ -168,10 +170,19 @@ public class MobileRouting extends Node {
     		System.out.println();
 		}
     }
+    public void CounterFloodingMethod() {
+    	if (k < n*2) {
+	    	broadcast();
+	    	k += 1;
+    	} else {
+    		become("DONE");
+    	}
+    }
     public void onLinkChange(Link link) {
-    	if (receivemsg)
+    	if (receivemsg) {
     		sender = null;
-    		onMessageOrLinkChange(null);
+    		onMessageOrLinkChange(null, true);
+    	}
     }
     
     @Override
@@ -199,8 +210,8 @@ public class MobileRouting extends Node {
 	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.RANDOM);
         }
         
-        tpg.setClockSpeed(2000,0);
-        tpg.setClockSpeed(2050,1);
+        tpg.setClockSpeed(1000,0);
+        tpg.setClockSpeed(1020,1);
         new JViewer(tpg);
         tpg.start();
     }

@@ -112,16 +112,19 @@ public class CounterFlooding extends Node {
 			broadcast();
 			firstreceive = false;
 		} else {
-	    	if (k < n*2) {
-		    	broadcast();
-		    	k += 1;
-	    	} else {
-	    		become("DONE");
-	    	}
+			CounterFloodingMethod();
 		}
 
     	if (done && !linkChange) {
     		doneMsg();
+    	}
+    }
+    public void CounterFloodingMethod() {
+    	if (k < n*2) {
+	    	broadcast();
+	    	k += 1;
+    	} else {
+    		become("DONE");
     	}
     }
     public void onLinkChange(Link link) {
