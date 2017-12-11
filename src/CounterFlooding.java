@@ -138,26 +138,41 @@ public class CounterFlooding extends Node {
     public void onLinkRemoved(Link link) {
     	onLinkChange(link);
     }
-
     public static void main(String args[]) {
+    	if(args.length != 2) {
+    		System.out.println("Usage: CounterFlooding <number of nodes> <thin or dense topology>");
+    		return;
+    	}
+    	
+    	int nodes = Integer.parseInt(args[0]);
+    	String toptype = args[1];
+    	
         Topology tpg = new Topology();
         tpg.setDefaultNodeModel(CounterFlooding.class);
-        int size = 25;
+        
+        if (nodes > 50 || nodes < 1) {
+        	System.out.println("Node size should be greater than 1 and less than 50");
+        	return;
+        }
+        
+        int size = nodes;
+        
         tpg.setMessageEngine(new MessageEngine());
 
-        boolean flag = true;
-        if (flag) {
+        if (toptype.equals("Thin")) {
 	        TopologyGenerator.generateRingLine(tpg, size);
 	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.ADVERSARY);
-        } else {
+        } else if (toptype.equals("Dense")){
 			TopologyGenerator.generateCompleteGraph(tpg, size);	        
 	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.RANDOM);
+        } else {
+        	System.out.println("Invalid topology type. Topology types: Thin, Dense");
+        	return;
         }
         
         tpg.setClockSpeed(2000,0);
-        tpg.setClockSpeed(2500,1);
+        tpg.setClockSpeed(2001,1);
         new JViewer(tpg);
         tpg.start();
     }
-
 }

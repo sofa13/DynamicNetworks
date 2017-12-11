@@ -154,12 +154,13 @@ public class IDFlooding extends Node {
     }
 
     public static void main(String args[]) {
+    	// pass node size, adversary or complete
         Topology tpg = new Topology();
         tpg.setDefaultNodeModel(IDFlooding.class);
-        int size = 25;
+        int size = 20;
         tpg.setMessageEngine(new MessageEngine());
 
-        boolean flag = true;
+        boolean flag = false;
         if (flag) {
 	        TopologyGenerator.generateRingLine(tpg, size);
 	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.ADVERSARY);
