@@ -59,8 +59,6 @@ public class IDFlooding extends Node {
 	            
 	            Message m = new Message(list);
 	            
-        		System.out.println(this.getNeighbors());
-	            
 	            become("INITIATOR");	           
 	            this.sendAll(m);	            
         	} else {
@@ -124,7 +122,7 @@ public class IDFlooding extends Node {
     public void doneMsg() {
 		try {
 			PrintWriter out;
-			out = new PrintWriter(new FileWriter("./src/CounterFloodingCorrectness.txt"));
+			out = new PrintWriter(new FileWriter("./src/IDFloodingCorrectness.txt"));
 			out.println("*** ALL RECEIVED, ID " + this.getID() + " ***");
 			out.println(this.getTotalMessages());
 			out.println();
@@ -141,9 +139,7 @@ public class IDFlooding extends Node {
     @Override
     public void onMessage(Message message) {
     	super.onMessage(message);
-    	if (!this.getIfAllReceivedNotif()) {
-    		System.out.println("My ID: "+this.getID()+" RCVD from: "+message.getSender().getID() + "  MSG: "+message.toString());
-    	}
+    	System.out.println("My ID: "+this.getID()+" RCVD: "+message.toString());
     	onMessageOrLinkChange(message, false);
     }
     
@@ -222,7 +218,7 @@ public class IDFlooding extends Node {
 	        TopologyGenerator.generateRingLine(tpg, size);
 	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.ADVERSARY);
         } else if (toptype.equals("Dense")){
-        	TopologyGenerator.generateCompleteGraph(tpg, size, .5, .4);	        
+        	TopologyGenerator.generateCompleteGraph(tpg, size, .2, .2);	        
 	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.RANDOM);
         } else {
         	System.out.println("Invalid topology type. Topology types: Thin, Dense");
@@ -245,8 +241,8 @@ public class IDFlooding extends Node {
             i++;
         }
         
-        tpg.setClockSpeed(500,0);
-        tpg.setClockSpeed(501,1);
+        tpg.setClockSpeed(4000,0);
+        tpg.setClockSpeed(6000,1);
         new JViewer(tpg);
         tpg.start();
     }

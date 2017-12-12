@@ -25,7 +25,6 @@ public class CounterFlooding extends Node {
     boolean receivemsg = false;
     boolean done = false;
     Message m = null;
-    Node sender = new Node();
     int k = 0;
     int n = 25;
 
@@ -53,8 +52,6 @@ public class CounterFlooding extends Node {
 	            
         		Message m = new Message(new Integer(this.getID()));
 	            
-        		System.out.println(this.getNeighbors());
-	            
 	            become("INITIATOR");	           
 	            this.sendAll(m);	            
         	} else {
@@ -66,14 +63,14 @@ public class CounterFlooding extends Node {
 
     public void receive(Message message, boolean linkChange) {
     	m = message;
-    	sender = message.getSender();
     	become("RECEIVED");
     	receivemsg = true;
     }
     
-    public void broadcast() {
+    public void broadcast(boolean linkChange) {
+    	Node bcSender = linkChange? null : m.getSender();
     	for (Node node : this.getNeighbors()) {
-            if (node != sender) {
+            if (node != bcSender) {
                 this.send(node, m);
             }
         }
@@ -137,11 +134,11 @@ public class CounterFlooding extends Node {
     public void CounterFloodingMethod(Message message, boolean linkChange) {
     	if (!receivemsg) {
 			receive(message, linkChange);
-			broadcast();
+			broadcast(linkChange);
 			k = 0;
 		} else {
 	    	if (k < n*2 && linkChange) {			
-		    	broadcast();
+		    	broadcast(linkChange);
 		    	k += 1;
 	    	} else if (k >= n*2 && linkChange){
 	    		become("DONE");
@@ -212,8 +209,8 @@ public class CounterFlooding extends Node {
             i++;
         }
         
-        tpg.setClockSpeed(2000,0);
-        tpg.setClockSpeed(2010,1);
+        tpg.setClockSpeed(6000,0);
+        tpg.setClockSpeed(6100,1);
         new JViewer(tpg);
         tpg.start();
     }
