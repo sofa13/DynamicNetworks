@@ -9,10 +9,11 @@ import java.util.List;
 import java.util.Random;
 
 public class TopologyGenerator {
-    public static void generateCompleteGraph(Topology tp, int N){
+    public static void generateCompleteGraph(Topology tp, int N, double br, double dr){
+    	tp.topSize = N;
     	Random r = new Random();
-    	double birthRate = .4;
-    	double deathRate = .4;
+    	double birthRate = tp.birthRate = br;
+    	double deathRate = tp.deathRate = dr;
     	double steadyProb = birthRate/(birthRate+deathRate);
 		try{
 			for (int i=0; i<N; i++){
@@ -38,6 +39,7 @@ public class TopologyGenerator {
 		generateRing(topology, nbNodes, false);
 	}
 	public static void generateRingLine(Topology topology, int nbNodes){
+		topology.topSize = nbNodes;
 		topology.setCommunicationRange(0);
 		int scale=100;
 		for (int i=0; i<nbNodes; i++) {

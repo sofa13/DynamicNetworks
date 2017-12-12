@@ -13,6 +13,7 @@ package jbotsim;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.List;
 
@@ -44,19 +45,18 @@ public class Node extends _Properties implements ClockListener, Comparable<Node>
      * Returns total number of messages sent by all nodes.
      * @return total number of messages as an integer.
      */
-    public int getTotalMessages() {
+    public String getTotalMessages() {
     	// get total number of messages
 		int totalMessages = 0;
+		String printMsg = new String("*** NUMBER MESSAGES RECEIVED BY EACH ID *** \n");
 		for (Node n : getTopology().getNodes()) {
 			 List<Message> mailbox = n.mailBox;
-			 System.out.print("ID ");
-			 System.out.print(n.getID());
-			 System.out.print(": ");
-			 System.out.print(mailbox.size());
-			 System.out.println();
+			 printMsg += "ID " + n.getID() + ": " + mailbox.size() + "\n";
 			 totalMessages += mailbox.size();
 		}
-		return totalMessages;
+		printMsg += "*** TOTAL NUMBER OF MESSAGES *** \n";
+		printMsg += totalMessages;
+		return printMsg;
     }
     /**
      * Returns time passed.
@@ -705,9 +705,9 @@ public class Node extends _Properties implements ClockListener, Comparable<Node>
      * Returns a string representation of this node.
      */
     public String toString(){
-        if (state==null)
+        //if (state==null)
             return ID.toString();
-        else
-            return state.toString();
+        //else
+            //return state.toString();
     }
 }

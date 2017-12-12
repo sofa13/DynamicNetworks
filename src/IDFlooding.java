@@ -1,6 +1,10 @@
 import java.awt.Color;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import jbotsim.Link;
 import jbotsim.Message;
@@ -118,13 +122,20 @@ public class IDFlooding extends Node {
     }
     
     public void doneMsg() {
-    	System.out.println("*** ALL RECEIVED, ID " + this.getID() + " ***");
-		System.out.println("*** TOTAL NUMBER OF MESSAGES ***");
-		System.out.println(this.getTotalMessages());
-		System.out.println();
-		System.out.println("*** TOTAL TIME ***");
-		System.out.println(this.getTotalTime());
-		System.out.println();
+		try {
+			PrintWriter out;
+			out = new PrintWriter(new FileWriter("./src/CounterFloodingCorrectness.txt"));
+			out.println("*** ALL RECEIVED, ID " + this.getID() + " ***");
+			out.println(this.getTotalMessages());
+			out.println();
+			out.println("*** TOTAL TIME ***");
+			out.println(this.getTotalTime());
+			out.println();
+			out.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}    
     }
     
     @Override
@@ -193,6 +204,8 @@ public class IDFlooding extends Node {
     	int nodes = Integer.parseInt(args[0]);
     	String toptype = args[1];
     	
+    	Random rnd = new Random();
+    	
         Topology tpg = new Topology();
         tpg.setDefaultNodeModel(IDFlooding.class);
         
@@ -209,11 +222,27 @@ public class IDFlooding extends Node {
 	        TopologyGenerator.generateRingLine(tpg, size);
 	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.ADVERSARY);
         } else if (toptype.equals("Dense")){
-			TopologyGenerator.generateCompleteGraph(tpg, size);	        
+        	TopologyGenerator.generateCompleteGraph(tpg, size, .5, .4);	        
 	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.RANDOM);
         } else {
         	System.out.println("Invalid topology type. Topology types: Thin, Dense");
         	return;
+        }
+        
+        int[] ids = new int[size];
+        for (int i = 0; i < ids.length; i++) {
+            ids[i] = i;
+        }
+        for (int i = 0; i < ids.length; i++) {
+            int j = rnd.nextInt(size);
+            int temp = ids[i];
+            ids[i] = ids[j];
+            ids[j] = temp;
+        }
+        int i = 0;
+        for (Node n : tpg.getNodes()) {
+            n.setID(ids[i]);
+            i++;
         }
         
         tpg.setClockSpeed(500,0);

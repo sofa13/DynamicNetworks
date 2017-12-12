@@ -46,7 +46,10 @@ public class Topology extends _Properties implements ClockListener{
     ArrayList<Node> toBeUpdated = new ArrayList<Node>();
     private boolean step = false;
     private boolean isStarted = false;
-
+    public int topSize = 0;
+    public double birthRate = 0; 
+    public double deathRate = 0;
+    
     public static enum RefreshMode {CLOCKBASED, EVENTBASED};
     RefreshMode refreshMode = RefreshMode.EVENTBASED;
 

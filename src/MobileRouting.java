@@ -1,4 +1,7 @@
 import java.awt.Color;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,13 +133,20 @@ public class MobileRouting extends Node {
     }
     
     public void doneMsg() {
-    	System.out.println("*** ALL RECEIVED, ID " + this.getID() + " ***");
-		System.out.println("*** TOTAL NUMBER OF MESSAGES ***");
-		System.out.println(this.getTotalMessages());
-		System.out.println();
-		System.out.println("*** TOTAL TIME ***");
-		System.out.println(this.getTotalTime());
-		System.out.println();
+		try {
+			PrintWriter out;
+			out = new PrintWriter(new FileWriter("./src/CounterFloodingCorrectness.txt"));
+			out.println("*** ALL RECEIVED, ID " + this.getID() + " ***");
+			out.println(this.getTotalMessages());
+			out.println();
+			out.println("*** TOTAL TIME ***");
+			out.println(this.getTotalTime());
+			out.println();
+			out.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}    
     }
     
 	@Override
@@ -234,7 +244,7 @@ public class MobileRouting extends Node {
 	        TopologyGenerator.generateRingLine(tpg, size);
 	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.ADVERSARY);
         } else {
-			TopologyGenerator.generateCompleteGraph(tpg, size);	        
+        	TopologyGenerator.generateCompleteGraph(tpg, size, .5, .4);		        
 	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.RANDOM);
         }
         
