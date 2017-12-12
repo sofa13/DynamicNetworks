@@ -26,7 +26,6 @@ public class IDFlooding extends Node {
     boolean firstclock = true;
     boolean receivemsg = false;
     boolean firstbroadcast = true;
-    boolean done = false;
     Message m = null;
     int k = 0;
     int n = 0;
@@ -57,10 +56,10 @@ public class IDFlooding extends Node {
 	            list.add(new Integer(this.getID()));
 	            list.add(new Integer(this.getID()));
 	            
-	            Message m = new Message(list);
-	            
+	            Message msg = new Message(list);
+	            System.out.println(System.identityHashCode(msg));
 	            become("INITIATOR");	           
-	            this.sendAll(m);	            
+	            this.sendAll(msg);	            
         	} else {
          		become("PASSIVE");
          	}
@@ -68,19 +67,19 @@ public class IDFlooding extends Node {
         }
     }
 
-    public void receive(Message message, boolean linkChange) {    	
+	public void receive(Message message, boolean linkChange) {    	
     	m = message;
     	become("RECEIVED");
     	receivemsg = true;
     }
     
-    @SuppressWarnings("unchecked")
 	public void broadcast(boolean linkChange, boolean append) {
     	Node bcSender = linkChange? null : m.getSender();
     	Message bcMessage = m;
     	if (append) {
-	    	List<Integer> list = (ArrayList<Integer>)m.getContent();
-			list.set(1,n);
+    		List<Integer> list = new ArrayList<Integer>();
+	    	list.add(0);
+            list.add(n);
 			bcMessage = new Message(list);
     	}
     	for (Node node : this.getNeighbors()) {
@@ -92,19 +91,15 @@ public class IDFlooding extends Node {
     
     public void become(String s) {
     	if (s == "INITIATOR") {
-    		done = false;
     		this.setState("INITIATOR");
     		this.setColor(Color.red);
     	} else if (s == "PASSIVE"){
-    		done = false;
     		this.setState("PASSIVE");
     	} else if (s == "RECEIVED") {
-    		done = false;
     		this.setState("RECEIVED");
     		this.setColor(Color.black);
     		checkAllReceived();
     	} else if (s == "DONE") {
-	    	done = true;
 	    	this.setState("DONE");
 	    	this.setColor(Color.white);
     	}
@@ -145,15 +140,16 @@ public class IDFlooding extends Node {
     
     @SuppressWarnings("unchecked")
 	public void onMessageOrLinkChange(Message message, boolean linkChange) {
+		
     	List<Integer> list = (ArrayList<Integer>)message.getContent();		
 		int w = list.get(1);
-		
+    	
     	if (!receivemsg) {
     		n = 0;
     		receive(message, linkChange);
     		w = this.getID() > w ? this.getID(): w;
     	}		
-		
+
 		if (w > n) {
 			become("RECEIVED");
 			n = w;

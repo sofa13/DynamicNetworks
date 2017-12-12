@@ -36,10 +36,6 @@ public class Node extends _Properties implements ClockListener, Comparable<Node>
     Object state=null;
     Integer ID = -1;
     int size = 8;
-    int k = 0;
-    int n = 0;
-    Message m = null;
-    boolean receivemsg = false;
     static ArrayList<Color> basicColors = new ArrayList<Color>(Arrays.asList(
             Color.red,Color.green,Color.blue,Color.yellow,
             Color.pink,Color.black,Color.white,Color.gray,

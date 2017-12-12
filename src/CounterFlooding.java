@@ -23,7 +23,6 @@ public class CounterFlooding extends Node {
 
     boolean firstclock = true;
     boolean receivemsg = false;
-    boolean done = false;
     Message m = null;
     int k = 0;
     int n = 25;
@@ -62,7 +61,9 @@ public class CounterFlooding extends Node {
     }
 
     public void receive(Message message, boolean linkChange) {
-    	m = message;
+    	Integer newContent = (Integer)message.getContent();
+    	Message newMessage = new Message(newContent);
+    	m = newMessage;
     	become("RECEIVED");
     	receivemsg = true;
     }
@@ -78,19 +79,15 @@ public class CounterFlooding extends Node {
     
     public void become(String s) {
     	if (s == "INITIATOR") {
-    		done = false;
     		this.setState("INITIATOR");
     		this.setColor(Color.red);
     	} else if (s == "PASSIVE"){
-    		done = false;
     		this.setState("PASSIVE");
     	} else if (s == "RECEIVED") {
-    		done = false;
     		this.setState("RECEIVED");
     		this.setColor(Color.black);
     		checkAllReceived();
     	} else if (s == "DONE") {
-	    	done = true;
 	    	this.setState("DONE");
 	    	this.setColor(Color.white);
     	}
