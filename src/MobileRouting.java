@@ -23,6 +23,7 @@ public class MobileRouting extends Node {
     boolean receivemsg = false;
     boolean done = false;
     boolean firstmode2 = true;
+    boolean firstprint = true;
     Message m = null;
     int k = 0;
     int n = 0;
@@ -51,21 +52,24 @@ public class MobileRouting extends Node {
     public void onClock() {
        
     	if (firstclock) {
-        	if (this.getID() == 0) {
-        		firstclock = false;
-	           
+        	if (this.getID() == 0) {        
         		System.out.println("My ID: "+this.getID()+" Clock");
+        		
 	            List<Integer> list = new ArrayList<Integer>();
 	            list.add(this.getID()); //msg
 	            list.add(10); //destination
 	            list.add(1); //mode
+	            
         		Message m = new Message(list);
 	            
         		System.out.println(this.getNeighbors());
 	            
 	            become("INITIATOR");	           
 	            this.sendAll(m);	            
-        	}
+        	} else {
+         		become("PASSIVE");
+         	}
+        	firstclock = false;
         }
     }
 
@@ -97,22 +101,50 @@ public class MobileRouting extends Node {
     }
     
     public void become(String s) {
-    	if (s == "DONE") {
-    		done = true;
-	    	this.setColor(Color.white);	    	
-    	} else if (s == "INITIATOR") {
+    	if (s == "INITIATOR") {
     		done = false;
+    		this.setState("INITIATOR");
     		this.setColor(Color.red);
+    	} else if (s == "PASSIVE"){
+    		done = false;
+    		this.setState("PASSIVE");
     	} else if (s == "RECEIVED") {
     		done = false;
+    		this.setState("RECEIVED");
     		this.setColor(Color.black);
+    		checkAllReceived();
+    	} else if (s == "DONE") {
+	    	done = true;
+	    	this.setState("DONE");
+	    	this.setColor(Color.white);
     	}
+    }
+    
+    public void checkAllReceived() {
+		if (this.getIfAllReceived()) {
+			if (!this.getIfAllReceivedNotif()) {
+				doneMsg();
+			}
+			this.setAllReceived(true);
+		}
+    }
+    
+    public void doneMsg() {
+    	System.out.println("*** ALL RECEIVED, ID " + this.getID() + " ***");
+		System.out.println("*** TOTAL NUMBER OF MESSAGES ***");
+		System.out.println(this.getTotalMessages());
+		System.out.println();
+		System.out.println("*** TOTAL TIME ***");
+		System.out.println(this.getTotalTime());
+		System.out.println();
     }
     
 	@Override
     public void onMessage(Message message) {
     	super.onMessage(message);
-    	System.out.println("My ID: "+this.getID()+" RCVD: "+message.toString());
+    	if (!this.getIfAllReceivedNotif()) {
+    		System.out.println("My ID: "+this.getID()+" RCVD: "+message.toString());
+    	}
     	onMessageOrLinkChange(message, false);
     }
     public void onMessageOrLinkChange(Message message, boolean linkChange) {		
@@ -120,9 +152,12 @@ public class MobileRouting extends Node {
 			receive(message, linkChange);
 			n = destID + 1;
 			if ((modemsg == 1 && this.getID() == destID)||(modemsg == 2)) {
-				System.out.println("***********************************");
-				System.out.println("*******DESTINATION RECEIVED********");
-				System.out.println("***********************************");
+				if (firstprint) {
+					System.out.println("***********************************");
+					System.out.println("*******DESTINATION RECEIVED********");
+					System.out.println("***********************************");
+					firstprint = false;
+				}
 				mode = 2;
 			} else {
 				generateMsg(1);
@@ -131,11 +166,13 @@ public class MobileRouting extends Node {
 			}
 		} else if (mode == 1) {
 			//on link change
-			if (message == null) {
-				n += 1;
-				generateMsg(1);
-				broadcast();
+			if (linkChange) {
+					n += 1;
+					generateMsg(1);
+					broadcast();
+					return;
 			}
+			//on msg received
 			receive(message, linkChange);
 			if (modemsg == 1 && destID > n) {
 				n = destID;
@@ -156,18 +193,9 @@ public class MobileRouting extends Node {
 				receive(message, linkChange);
 				if (n > destID) {
 					n = destID;
-					CounterFloodingMethod();
 				}
+				CounterFloodingMethod();
 			}
-		}
-		if (done && !linkChange) {
-    		System.out.println("*** DONE, ID " + this.getID() + " ***");
-    		System.out.println("*** TOTAL NUMBER OF MESSAGES ***");
-    		System.out.println(this.getTotalMessages());
-    		System.out.println();
-    		System.out.println("*** TOTAL TIME ***");
-    		System.out.println(this.getTotalTime());
-    		System.out.println();
 		}
     }
     public void CounterFloodingMethod() {

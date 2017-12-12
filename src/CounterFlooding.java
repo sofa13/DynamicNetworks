@@ -19,7 +19,6 @@ public class CounterFlooding extends Node {
 
     boolean firstclock = true;
     boolean receivemsg = false;
-    boolean firstreceive = true;
     boolean done = false;
     Message m = null;
     Node sender = new Node();
@@ -45,9 +44,7 @@ public class CounterFlooding extends Node {
     public void onClock() {
        
     	if (firstclock) {
-        	if (this.getID() == 0) {
-        		firstclock = false;
-	           
+        	if (this.getID() == 0) {	           
         		System.out.println("My ID: "+this.getID()+" Clock");
 	            
         		Message m = new Message(new Integer(this.getID()));
@@ -56,17 +53,18 @@ public class CounterFlooding extends Node {
 	            
 	            become("INITIATOR");	           
 	            this.sendAll(m);	            
-        	}
+        	} else {
+         		become("PASSIVE");
+         	}
+        	firstclock = false;
         }
     }
 
     public void receive(Message message, boolean linkChange) {
     	m = message;
-    	sender = linkChange? null : message.getSender();
-    	if (!receivemsg) {
-	    	become("RECEIVED");
-	    	receivemsg = true;
-    	}
+    	sender = message.getSender();
+    	become("RECEIVED");
+    	receivemsg = true;
     }
     
     public void broadcast() {
@@ -78,20 +76,36 @@ public class CounterFlooding extends Node {
     }
     
     public void become(String s) {
-    	if (s == "DONE") {
-	    	done = true;
-	    	this.setColor(Color.white);
-    	} else if (s == "INITIATOR") {
+    	if (s == "INITIATOR") {
     		done = false;
+    		this.setState("INITIATOR");
     		this.setColor(Color.red);
+    	} else if (s == "PASSIVE"){
+    		done = false;
+    		this.setState("PASSIVE");
     	} else if (s == "RECEIVED") {
     		done = false;
+    		this.setState("RECEIVED");
     		this.setColor(Color.black);
+    		checkAllReceived();
+    	} else if (s == "DONE") {
+	    	done = true;
+	    	this.setState("DONE");
+	    	this.setColor(Color.white);
     	}
     }
     
+    public void checkAllReceived() {
+		if (this.getIfAllReceived()) {
+			if (!this.getIfAllReceivedNotif()) {
+				doneMsg();
+			}
+			this.setAllReceived(true);
+		}
+    }
+    
     public void doneMsg() {
-    	System.out.println("*** DONE, ID " + this.getID() + " ***");
+    	System.out.println("*** ALL RECEIVED, ID " + this.getID() + " ***");
 		System.out.println("*** TOTAL NUMBER OF MESSAGES ***");
 		System.out.println(this.getTotalMessages());
 		System.out.println();
@@ -103,29 +117,27 @@ public class CounterFlooding extends Node {
     @Override
     public void onMessage(Message message) {
     	super.onMessage(message);
-    	System.out.println("My ID: "+this.getID()+" RCVD: "+message.toString());
+    	if (!this.getIfAllReceivedNotif()) {
+    		System.out.println("My ID: "+this.getID()+" RCVD: "+message.toString());
+    	}
     	onMessageOrLinkChange(message, false);
     }
-    public void onMessageOrLinkChange(Message message, boolean linkChange) {
-		receive(message, linkChange);
-		if (firstreceive) {
-			broadcast();
-			firstreceive = false;
-		} else {
-			CounterFloodingMethod();
-		}
-
-    	if (done && !linkChange) {
-    		doneMsg();
-    	}
+    public void onMessageOrLinkChange(Message message, boolean linkChange) {		
+    	CounterFloodingMethod(message, linkChange);
     }
-    public void CounterFloodingMethod() {
-    	if (k < n*2) {
-	    	broadcast();
-	    	k += 1;
-    	} else {
-    		become("DONE");
-    	}
+    public void CounterFloodingMethod(Message message, boolean linkChange) {
+    	if (!receivemsg) {
+			receive(message, linkChange);
+			broadcast();
+			k = 0;
+		} else {
+	    	if (k < n*2 && linkChange) {			
+		    	broadcast();
+		    	k += 1;
+	    	} else if (k >= n*2 && linkChange){
+	    		become("DONE");
+	    	}
+		}
     }
     public void onLinkChange(Link link) {
     	if (receivemsg)
@@ -173,8 +185,8 @@ public class CounterFlooding extends Node {
         	return;
         }
         
-        tpg.setClockSpeed(2000,0);
-        tpg.setClockSpeed(2001,1);
+        tpg.setClockSpeed(1000,0);
+        tpg.setClockSpeed(1010,1);
         new JViewer(tpg);
         tpg.start();
     }

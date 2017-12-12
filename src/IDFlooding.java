@@ -21,9 +21,9 @@ public class IDFlooding extends Node {
 
     boolean firstclock = true;
     boolean receivemsg = false;
+    boolean firstbroadcast = true;
     boolean done = false;
     Message m = null;
-    Node sender = new Node();
     int k = 0;
     int n = 0;
 
@@ -46,53 +46,79 @@ public class IDFlooding extends Node {
     public void onClock() {
        
     	if (firstclock) {
-        	if (this.getID() == 0) {
-        		firstclock = false;
-	           
+        	if (this.getID() == 0) {          
         		System.out.println("My ID: "+this.getID()+" Clock");
-	            List<Integer> list = new ArrayList<Integer>();
-	            list.add(this.getID());
-	            list.add(this.getID());
-        		Message m = new Message(list);
+        		
+        		List<Integer> list = new ArrayList<Integer>();
+	            list.add(new Integer(this.getID()));
+	            list.add(new Integer(this.getID()));
+	            
+	            Message m = new Message(list);
 	            
         		System.out.println(this.getNeighbors());
 	            
 	            become("INITIATOR");	           
 	            this.sendAll(m);	            
-        	}
+        	} else {
+         		become("PASSIVE");
+         	}
+        	firstclock = false;
         }
     }
 
     public void receive(Message message, boolean linkChange) {    	
     	m = message;
-    	sender = linkChange? null : message.getSender();
     	become("RECEIVED");
     	receivemsg = true;
     }
     
-    public void broadcast() {
+    @SuppressWarnings("unchecked")
+	public void broadcast(boolean linkChange, boolean append) {
+    	Node bcSender = linkChange? null : m.getSender();
+    	Message bcMessage = m;
+    	if (append) {
+	    	List<Integer> list = (ArrayList<Integer>)m.getContent();
+			list.set(1,n);
+			bcMessage = new Message(list);
+    	}
     	for (Node node : this.getNeighbors()) {
-            if (node != sender) {
-                this.send(node, m);
+            if (node != bcSender) {
+                this.send(node, bcMessage);
             }
         }
     }
     
     public void become(String s) {
-    	if (s == "DONE") {
-    		done = true;
-	    	this.setColor(Color.white);	    	
-    	} else if (s == "INITIATOR") {
+    	if (s == "INITIATOR") {
     		done = false;
+    		this.setState("INITIATOR");
     		this.setColor(Color.red);
+    	} else if (s == "PASSIVE"){
+    		done = false;
+    		this.setState("PASSIVE");
     	} else if (s == "RECEIVED") {
     		done = false;
+    		this.setState("RECEIVED");
     		this.setColor(Color.black);
+    		checkAllReceived();
+    	} else if (s == "DONE") {
+	    	done = true;
+	    	this.setState("DONE");
+	    	this.setColor(Color.white);
     	}
     }
     
+    public void checkAllReceived() {
+		if (this.getIfAllReceived()) {
+			if (!this.getIfAllReceivedNotif()) {
+				doneMsg();
+			}
+			this.setAllReceived(true);
+		}
+    }
+    
     public void doneMsg() {
-    	System.out.println("*** DONE, ID " + this.getID() + " ***");
+    	System.out.println("*** ALL RECEIVED, ID " + this.getID() + " ***");
 		System.out.println("*** TOTAL NUMBER OF MESSAGES ***");
 		System.out.println(this.getTotalMessages());
 		System.out.println();
@@ -104,38 +130,45 @@ public class IDFlooding extends Node {
     @Override
     public void onMessage(Message message) {
     	super.onMessage(message);
-    	System.out.println("My ID: "+this.getID()+" RCVD: "+message.toString());
+    	if (!this.getIfAllReceivedNotif()) {
+    		System.out.println("My ID: "+this.getID()+" RCVD from: "+message.getSender().getID() + "  MSG: "+message.toString());
+    	}
     	onMessageOrLinkChange(message, false);
     }
     
     @SuppressWarnings("unchecked")
-    public void onMessageOrLinkChange(Message message, boolean linkChange) {
-		List<Integer> list = (ArrayList<Integer>)message.getContent();
+	public void onMessageOrLinkChange(Message message, boolean linkChange) {
+    	List<Integer> list = (ArrayList<Integer>)message.getContent();		
+		int w = list.get(1);
 		
-		int maxID = list.get(1);
+    	if (!receivemsg) {
+    		n = 0;
+    		receive(message, linkChange);
+    		w = this.getID() > w ? this.getID(): w;
+    	}		
 		
-		if (!receivemsg) {
-			maxID = this.getID() > maxID ? this.getID(): maxID; 
+		if (w > n) {
+			become("RECEIVED");
+			n = w;
 		}
-		
-		if (maxID > n) {
-			List<Integer> list2 = new ArrayList<Integer>();
-			list2.add(list.get(0));
-			list2.add(maxID);
-			receive(new Message(list2), linkChange);
-			n = maxID;			
-		}
-		if (k < n*2) {
-	    	broadcast();
-	    	k += 1;
-    	} else {
-    		become("DONE");
-    	}
-		
-		if (done && !linkChange) {
-			doneMsg();
+		CounterFloodingMethod(message, linkChange, n+1, true);
+    }
+    
+    public void CounterFloodingMethod(Message message, boolean linkChange, int nprime, boolean append) {
+    	if (firstbroadcast) {
+			broadcast(linkChange, append);
+			k = 0;
+			firstbroadcast = false;
+		} else {
+	    	if (k < nprime*2 && linkChange) {
+		    	broadcast(linkChange, append);
+		    	k += 1;
+	    	} else if (k >= nprime*2 && linkChange){
+	    		become("DONE");
+	    	}
 		}
     }
+    
     public void onLinkChange(Link link) {
     	if (receivemsg)
     		onMessageOrLinkChange(m, true);
@@ -153,7 +186,7 @@ public class IDFlooding extends Node {
 
     public static void main(String args[]) {
     	if(args.length != 2) {
-    		System.out.println("Usage: CounterFlooding <number of nodes> <thin or dense topology>");
+    		System.out.println("Usage: IDFlooding <number of nodes> <thin or dense topology>");
     		return;
     	}
     	
@@ -183,8 +216,8 @@ public class IDFlooding extends Node {
         	return;
         }
         
-        tpg.setClockSpeed(2000,0);
-        tpg.setClockSpeed(2001,1);
+        tpg.setClockSpeed(500,0);
+        tpg.setClockSpeed(501,1);
         new JViewer(tpg);
         tpg.start();
     }

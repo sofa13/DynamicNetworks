@@ -29,6 +29,7 @@ public class Node extends _Properties implements ClockListener, Comparable<Node>
     Double sensingRange = null;
     List<Node> sensedNodes=new ArrayList<Node>();
     boolean isWirelessEnabled = true;
+    boolean allreceived = false;
     Topology topo;
     Color color = null;
     Object state=null;
@@ -65,6 +66,33 @@ public class Node extends _Properties implements ClockListener, Comparable<Node>
     	// get time passed
 		return getTopology().getTime(0);
     } 
+    /**
+     * Returns time passed.
+     * @return time passed as an integer.
+     */
+    public boolean getIfAllReceived() {
+    	// get if all nodes have received the msg
+		for (Node n : getTopology().getNodes()) {
+			// all received is false if a node's state in the graph is not DONE or not RECEIVED, 
+			if (!(n.getState().equals("DONE") || n.getState().equals("RECEIVED")))
+				return false;			
+		}
+		return true;
+    }
+    public boolean getIfAllReceivedNotif() {
+		for (Node n : getTopology().getNodes()) {
+			// If another node has already determined allreceived don't print msg
+			if (n.allreceived)
+				return true;			
+		}
+		return false;
+    } 
+    public void setAllReceived(boolean received) {
+    	allreceived = received;
+    }
+    public boolean getAllReceived() {
+    	return allreceived;
+    }
     /**
      * Returns the identifier of this node.
      * @return The identifier as an integer.
