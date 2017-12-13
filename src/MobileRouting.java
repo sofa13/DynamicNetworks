@@ -146,7 +146,7 @@ public class MobileRouting extends Node {
 	@Override
     public void onMessage(Message message) {
     	super.onMessage(message);
-    	System.out.println("My ID: "+this.getID()+" RCVD: "+message.toString());
+    	System.out.println("My ID: "+this.getID()+" RCVD: "+message.toString()+" n: " + n + " k: " + k);
     	onMessageOrLinkChange(message, false);
     }
     public void onMessageOrLinkChange(Message message, boolean linkChange) {		
@@ -222,7 +222,7 @@ public class MobileRouting extends Node {
 
     public static void main(String args[]) {
     	if(args.length != 3) {
-    		System.out.println("Usage: IDFlooding <number of nodes> <thin or dense topology> <slow or fast speed>");
+    		System.out.println("Usage: IDFlooding <number of nodes> <thin dense or adversary topology> <slow or fast speed>");
     		return;
     	}
     	
@@ -233,8 +233,8 @@ public class MobileRouting extends Node {
     	if (nodes > 50 || nodes < 1) {
         	System.out.println("Node size should be greater than 1 and less than 50");
         	return;
-        } else if (!(toptype.equals("thin") || toptype.equals("dense"))) {
-        	System.out.println("Invalid topology. Topology: thin, dense");
+        } else if (!(toptype.equals("thin") || toptype.equals("dense") || toptype.equals("adversary"))) {
+        	System.out.println("Invalid topology. Topology: thin, dense or adversary");
         	return;
         } else if (!(speed.equals("slow") || speed.equals("fast"))) {
         	System.out.println("Invalid speed. Speeds: slow, fast");
@@ -252,26 +252,32 @@ public class MobileRouting extends Node {
 
         if (toptype.equals("thin")) {
 	        TopologyGenerator.generateRingLine(tpg, size);
-	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.ADVERSARY);
+	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.THIN);
         } else if (toptype.equals("dense")){
-        	TopologyGenerator.generateCompleteGraph(tpg, size, .2, .2);	        
-	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.RANDOM);
+        	TopologyGenerator.generateCompleteGraph(tpg, size, .4, .4);	        
+	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.DENSE);
+        } else if (toptype.equals("adversary")){
+        	TopologyGenerator.generateRingLine(tpg, size);
+	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.ADVERSARY);
         }
         
-        int[] ids = new int[size];
-        for (int i = 0; i < ids.length; i++) {
-            ids[i] = i;
-        }
-        for (int i = 0; i < ids.length; i++) {
-            int j = rnd.nextInt(size);
-            int temp = ids[i];
-            ids[i] = ids[j];
-            ids[j] = temp;
-        }
-        int i = 0;
-        for (Node n : tpg.getNodes()) {
-            n.setID(ids[i]);
-            i++;
+        // generate random id configuration for thin and dense topology
+        if (toptype.equals("thin") || toptype.equals("dense")) {
+	        int[] ids = new int[size];
+	        for (int i = 0; i < ids.length; i++) {
+	            ids[i] = i;
+	        }
+	        for (int i = 0; i < ids.length; i++) {
+	            int j = rnd.nextInt(size);
+	            int temp = ids[i];
+	            ids[i] = ids[j];
+	            ids[j] = temp;
+	        }
+	        int i = 0;
+	        for (Node n : tpg.getNodes()) {
+	            n.setID(ids[i]);
+	            i++;
+	        }
         }
         
         if (speed.equals("fast")) {

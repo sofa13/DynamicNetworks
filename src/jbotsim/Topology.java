@@ -76,7 +76,7 @@ public class Topology extends _Properties implements ClockListener{
      */
     public Topology(int width, int height, boolean toBeStarted){
         setMessageEngine(new MessageEngine());
-        setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.RANDOM);
+        setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.THIN);
         setNodeScheduler(new DefaultNodeScheduler());
         setDimensions(width, height);
         // add two clocks

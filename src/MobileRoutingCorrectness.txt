@@ -1,33 +1,33 @@
 *** ALL RECEIVED, ID 10 ***
 *** NUMBER MESSAGES RECEIVED BY EACH ID *** 
-ID 6: 0
+ID 0: 14
+ID 1: 5
+ID 2: 6
+ID 3: 10
+ID 4: 10
+ID 5: 10
+ID 6: 10
+ID 7: 9
+ID 8: 6
+ID 9: 5
 ID 10: 1
-ID 15: 0
-ID 12: 0
-ID 19: 0
-ID 7: 0
-ID 1: 1
-ID 22: 0
-ID 4: 0
-ID 23: 0
 ID 11: 0
-ID 20: 0
-ID 0: 0
+ID 12: 0
 ID 13: 0
-ID 8: 2
-ID 3: 0
-ID 21: 0
-ID 5: 0
-ID 17: 0
-ID 24: 0
-ID 9: 0
-ID 16: 0
-ID 2: 1
 ID 14: 0
+ID 15: 0
+ID 16: 0
+ID 17: 0
 ID 18: 0
+ID 19: 0
+ID 20: 0
+ID 21: 0
+ID 22: 0
+ID 23: 0
+ID 24: 0
 *** TOTAL NUMBER OF MESSAGES *** 
-5
+86
 
 *** TOTAL TIME ***
-3
+10
 
