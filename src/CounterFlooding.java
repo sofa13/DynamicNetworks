@@ -60,10 +60,8 @@ public class CounterFlooding extends Node {
         }
     }
 
-    public void receive(Message message, boolean linkChange) {
-    	Integer newContent = (Integer)message.getContent();
-    	Message newMessage = new Message(newContent);
-    	m = newMessage;
+    public void receive(Message message) {
+    	m = message;
     	become("RECEIVED");
     	receivemsg = true;
     }
@@ -130,7 +128,7 @@ public class CounterFlooding extends Node {
     }
     public void CounterFloodingMethod(Message message, boolean linkChange) {
     	if (!receivemsg) {
-			receive(message, linkChange);
+			receive(message);
 			broadcast(linkChange);
 			k = 0;
 		} else {

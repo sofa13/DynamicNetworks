@@ -57,7 +57,7 @@ public class IDFlooding extends Node {
 	            list.add(new Integer(this.getID()));
 	            
 	            Message msg = new Message(list);
-	            System.out.println(System.identityHashCode(msg));
+
 	            become("INITIATOR");	           
 	            this.sendAll(msg);	            
         	} else {
@@ -67,21 +67,20 @@ public class IDFlooding extends Node {
         }
     }
 
-	public void receive(Message message, boolean linkChange) {    	
+	public void receive(Message message) {    	
     	m = message;
     	become("RECEIVED");
     	receivemsg = true;
     }
     
-	public void broadcast(boolean linkChange, boolean append) {
+	public void broadcast(boolean linkChange) {
     	Node bcSender = linkChange? null : m.getSender();
-    	Message bcMessage = m;
-    	if (append) {
-    		List<Integer> list = new ArrayList<Integer>();
-	    	list.add(0);
-            list.add(n);
-			bcMessage = new Message(list);
-    	}
+
+		List<Integer> list = new ArrayList<Integer>();
+    	list.add(0);
+        list.add(n);
+		Message bcMessage = new Message(list);
+
     	for (Node node : this.getNeighbors()) {
             if (node != bcSender) {
                 this.send(node, bcMessage);
@@ -146,7 +145,7 @@ public class IDFlooding extends Node {
     	
     	if (!receivemsg) {
     		n = 0;
-    		receive(message, linkChange);
+    		receive(message);
     		w = this.getID() > w ? this.getID(): w;
     	}		
 
@@ -154,17 +153,17 @@ public class IDFlooding extends Node {
 			become("RECEIVED");
 			n = w;
 		}
-		CounterFloodingMethod(message, linkChange, n+1, true);
+		CounterFloodingMethod(linkChange, n+1);
     }
     
-    public void CounterFloodingMethod(Message message, boolean linkChange, int nprime, boolean append) {
+    public void CounterFloodingMethod(boolean linkChange, int nprime) {
     	if (firstbroadcast) {
-			broadcast(linkChange, append);
+			broadcast(linkChange);
 			k = 0;
 			firstbroadcast = false;
 		} else {
 	    	if (k < nprime*2 && linkChange) {
-		    	broadcast(linkChange, append);
+		    	broadcast(linkChange);
 		    	k += 1;
 	    	} else if (k >= nprime*2 && linkChange){
 	    		become("DONE");
