@@ -34,10 +34,12 @@ public class DynamicEngine implements ClockListener {
         topology.addClockListener(this, speed);
     }
     public void onClock(){
-    	if (type == Type.ADVERSARY)
+    	if (type == Type.ADVERSARY) {
     		processDynamicNetwork();
-    	else if (type == Type.RANDOM)
+    		//adversarial();
+    	} else if (type == Type.RANDOM) {
         	updateLinks();
+    	}
     }
     
     protected void updateLinks(){
@@ -99,6 +101,59 @@ public class DynamicEngine implements ClockListener {
 		        	start = end;
 		        	nodeIds.remove(randomIndex);
 		        }
+        	}
+        }
+    }
+    
+    protected void adversarial(){
+    	
+        List<Node> nodes = topology.getNodes();
+        List<Link> links = topology.getLinks();
+        
+        if (nodes != null && links != null) {
+        	int numnodes = nodes.size();
+        	if (numnodes == 25) {
+        		if (first) {
+        			first = false;
+        		} else {
+	        		if (step % numnodes == 0) {
+	        			step = 0;
+	        			step += 1;
+	        		}
+		        	
+			        if (round % numnodes == 0 && round != 0) {
+			        	round = 0;
+			        }
+		    		if (step % numnodes == 0 && step != 0) {
+		    			step = 0;
+		    			round += 1;
+		    		}
+		    		
+			    	Node n1 = nodes.get(round);
+			    	Node n2 = nodes.get(step);
+			    	Link newlink = new Link(n1, n2);
+			    	
+			    	int id = n2.getID();
+			    	Node n3 = nodes.get(id-1);
+			    	Link oldlink = new Link(n3, n2);
+			    	
+			    	if (prevlink != null && prevaddlink !=null && oldlink != null && newlink != null) {
+			    		if (prevlink != null && prevaddlink !=null) {
+			    			topology.addLink(newlink);
+				    		topology.addLink(prevlink);
+				    		topology.removeLink(prevaddlink);
+				    		topology.removeLink(oldlink);
+			    		} else {
+			    			topology.addLink(newlink);
+				    		topology.removeLink(oldlink);
+				    	}
+			    	} 
+				    	
+			    	// increase step and save prev link
+			    	prevlink = oldlink;
+			    	prevaddlink = newlink;
+			    	step += 1;
+        		}
         	}
         }
     }
