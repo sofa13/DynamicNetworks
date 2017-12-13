@@ -57,26 +57,32 @@ public class Topology extends _Properties implements ClockListener{
      * Creates a topology.
      */
     public Topology(){
-        this(600, 400, true);
+        this(600, 400, true, DynamicEngine.Type.THIN);
+    }
+    /**
+     * Creates a topology and sets dynamic engine type.
+     */
+    public Topology(DynamicEngine.Type dytype){
+    	this(600, 400, true, dytype);        
     }
     /**
      * Creates a topology and sets its running status (running/paused).
      */
     public Topology(boolean toBeStarted){
-        this(600, 400, toBeStarted);
+        this(600, 400, toBeStarted, DynamicEngine.Type.THIN);
     }
     /**
      * Creates a topology of given dimensions.
      */
     public Topology(int width, int height){
-        this(width, height, true);
+        this(width, height, true, DynamicEngine.Type.THIN);
     }
     /**
      * Creates a topology of given dimensions.
      */
-    public Topology(int width, int height, boolean toBeStarted){
+    public Topology(int width, int height, boolean toBeStarted, DynamicEngine.Type type){
         setMessageEngine(new MessageEngine());
-        setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.THIN);
+        setDynamicEngine(new DynamicEngine(), type);
         setNodeScheduler(new DefaultNodeScheduler());
         setDimensions(width, height);
         // add two clocks

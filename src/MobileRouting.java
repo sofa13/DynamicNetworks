@@ -230,8 +230,8 @@ public class MobileRouting extends Node {
     	String toptype = args[1];
     	String speed = args[2];
     	
-    	if (nodes > 50 || nodes < 1) {
-        	System.out.println("Node size should be greater than 1 and less than 50");
+    	if (nodes > 200 || nodes < 1) {
+        	System.out.println("Node size should be greater than 1 and less than 200");
         	return;
         } else if (!(toptype.equals("thin") || toptype.equals("dense") || toptype.equals("adversary"))) {
         	System.out.println("Invalid topology. Topology: thin, dense or adversary");
@@ -241,9 +241,16 @@ public class MobileRouting extends Node {
         	return;
         }
     	
-    	Random rnd = new Random();
-    	
-        Topology tpg = new Topology();
+    	DynamicEngine.Type type = DynamicEngine.Type.THIN;
+    	if (toptype.equals("thin")) {
+    		type = DynamicEngine.Type.THIN;
+        } else if (toptype.equals("dense")){
+        	type = DynamicEngine.Type.DENSE;
+        } else if (toptype.equals("adversary")){
+        	type = DynamicEngine.Type.ADVERSARY;
+        }
+   	
+        Topology tpg = new Topology(type);
         tpg.setDefaultNodeModel(MobileRouting.class);
                
         int size = nodes; 
@@ -252,17 +259,18 @@ public class MobileRouting extends Node {
 
         if (toptype.equals("thin")) {
 	        TopologyGenerator.generateRingLine(tpg, size);
-	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.THIN);
+	        tpg.setDynamicEngine(new DynamicEngine(), type);
         } else if (toptype.equals("dense")){
         	TopologyGenerator.generateCompleteGraph(tpg, size, .4, .4);	        
-	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.DENSE);
+	        tpg.setDynamicEngine(new DynamicEngine(), type);
         } else if (toptype.equals("adversary")){
         	TopologyGenerator.generateRingLine(tpg, size);
-	        tpg.setDynamicEngine(new DynamicEngine(), DynamicEngine.Type.ADVERSARY);
+	        tpg.setDynamicEngine(new DynamicEngine(), type);
         }
         
         // generate random id configuration for thin and dense topology
         if (toptype.equals("thin") || toptype.equals("dense")) {
+        	Random rnd = new Random();
 	        int[] ids = new int[size];
 	        for (int i = 0; i < ids.length; i++) {
 	            ids[i] = i;
@@ -282,7 +290,7 @@ public class MobileRouting extends Node {
         
         if (speed.equals("fast")) {
         	tpg.setClockSpeed(1000,0);
-            tpg.setClockSpeed(1010,1);
+            tpg.setClockSpeed(1020,1);
         } else if (speed.equals("slow")) {
         	tpg.setClockSpeed(6000,0);
             tpg.setClockSpeed(6010,1);
