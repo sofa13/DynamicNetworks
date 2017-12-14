@@ -10,7 +10,7 @@ import java.util.Random;
 
 public class TopologyGenerator {
     public static void generateCompleteGraph(Topology tp, int N, double br, double dr){
-    	tp.topSize = N;
+    	
     	Random r = new Random();
     	double birthRate = tp.birthRate = br;
     	double deathRate = tp.deathRate = dr;
@@ -27,7 +27,8 @@ public class TopologyGenerator {
 				if (r.nextDouble() < steadyProb)
 					tp.addLink(new Link(nodes.get(i), nodes.get(j)));
 			}
-		}		
+		}
+		tp.topSize = N;
 	}
 	public static void generateLine(Topology tp, int order){
 		int scale=(tp.getDimensions().width-50)/order;
@@ -39,7 +40,7 @@ public class TopologyGenerator {
 		generateRing(topology, nbNodes, false);
 	}
 	public static void generateRingLine(Topology topology, int nbNodes){
-		topology.topSize = nbNodes;
+		
 		topology.setCommunicationRange(0);
 		int scale=100;
 		for (int i=0; i<nbNodes; i++) {
@@ -49,6 +50,7 @@ public class TopologyGenerator {
 		List<Node> nodes = topology.getNodes();
 		for (int i=0; i<nbNodes-1; i++)
 			topology.addLink(new Link(nodes.get(i), nodes.get(i+1)));
+		topology.topSize = nbNodes;
 	}
 	public static void generateRing(Topology topology, int nbNodes, boolean directed){
 		topology.setCommunicationRange(0);

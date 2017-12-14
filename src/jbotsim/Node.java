@@ -31,7 +31,7 @@ public class Node extends _Properties implements ClockListener, Comparable<Node>
     List<Node> sensedNodes=new ArrayList<Node>();
     boolean isWirelessEnabled = true;
     boolean allreceived = false;
-    Topology topo;
+    public Topology topo;
     Color color = null;
     Object state=null;
     Integer ID = -1;

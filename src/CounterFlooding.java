@@ -25,7 +25,7 @@ public class CounterFlooding extends Node {
     boolean receivemsg = false;
     Message m = null;
     int k = 0;
-    int n = 25;
+    int n = topo.topSize;
 
     public CounterFlooding() {
 
@@ -103,7 +103,7 @@ public class CounterFlooding extends Node {
     public void doneMsg() {
 		try {
 			PrintWriter out;
-			out = new PrintWriter(new FileWriter("./src/CounterFloodingCorrectness.txt"));
+			out = new PrintWriter(new FileWriter("./CounterFloodingCorrectness.txt"));
 			out.println("*** ALL RECEIVED, ID " + this.getID() + " ***");
 			out.println(this.getTotalMessages());
 			out.println();

@@ -116,7 +116,7 @@ public class IDFlooding extends Node {
     public void doneMsg() {
 		try {
 			PrintWriter out;
-			out = new PrintWriter(new FileWriter("./src/IDFloodingCorrectness.txt"));
+			out = new PrintWriter(new FileWriter("./IDFloodingCorrectness.txt"));
 			out.println("*** ALL RECEIVED, ID " + this.getID() + " ***");
 			out.println(this.getTotalMessages());
 			out.println();

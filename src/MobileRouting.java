@@ -61,7 +61,7 @@ public class MobileRouting extends Node {
         		
 	            List<Integer> list = new ArrayList<Integer>();
 	            list.add(this.getID()); //msg
-	            list.add(10); //destination
+	            list.add(this.topo.topSize-1); //destination
 	            list.add(0); //mode
 	            
 	            mode = 1;
@@ -129,7 +129,7 @@ public class MobileRouting extends Node {
     public void doneMsg() {
 		try {
 			PrintWriter out;
-			out = new PrintWriter(new FileWriter("./src/MobileRoutingCorrectness.txt"));
+			out = new PrintWriter(new FileWriter("./MobileRoutingCorrectness.txt"));
 			out.println("*** ALL RECEIVED, ID " + this.getID() + " ***");
 			out.println(this.getTotalMessages());
 			out.println();
