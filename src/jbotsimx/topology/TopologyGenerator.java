@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 public class TopologyGenerator {
-    public static void generateCompleteGraph(Topology tp, int N, double br, double dr){
+    public static void generateCompleteGraph(Topology tp, int N, double br, double dr, boolean counterFlooding){
     	
     	Random r = new Random();
     	double birthRate = tp.birthRate = br;
@@ -18,7 +18,10 @@ public class TopologyGenerator {
 		try{
 			for (int i=0; i<N; i++){
 				double angle=(2.0*Math.PI/N)*i;
-	            tp.addNode(200+Math.cos(angle)*150, 200+Math.sin(angle)*150, tp.newInstanceOfModel("default"));
+				if (counterFlooding)
+					tp.addNode(200+Math.cos(angle)*150, 200+Math.sin(angle)*150, tp.newInstanceOfModel("default", N));
+				else
+					tp.addNode(200+Math.cos(angle)*150, 200+Math.sin(angle)*150, tp.newInstanceOfModel("default"));
 			}
 		}catch (Exception e) {e.printStackTrace();}
 		List<Node> nodes = tp.getNodes();
@@ -39,13 +42,16 @@ public class TopologyGenerator {
 	public static void generateRing(Topology topology, int nbNodes) {
 		generateRing(topology, nbNodes, false);
 	}
-	public static void generateRingLine(Topology topology, int nbNodes){
+	public static void generateRingLine(Topology topology, int nbNodes, boolean counterFlooding){
 		
 		topology.setCommunicationRange(0);
 		int scale=100;
 		for (int i=0; i<nbNodes; i++) {
 			double angle=(2.0*Math.PI/nbNodes)*i;
-			topology.addNode(200+Math.cos(angle)*150, 200+Math.sin(angle)*150,topology.newInstanceOfModel("default"));
+			if (counterFlooding)
+				topology.addNode(200+Math.cos(angle)*150, 200+Math.sin(angle)*150,topology.newInstanceOfModel("default", nbNodes));
+			else
+				topology.addNode(200+Math.cos(angle)*150, 200+Math.sin(angle)*150,topology.newInstanceOfModel("default"));			
 		}
 		List<Node> nodes = topology.getNodes();
 		for (int i=0; i<nbNodes-1; i++)

@@ -258,13 +258,13 @@ public class MobileRouting extends Node {
         tpg.setMessageEngine(new MessageEngine());
 
         if (toptype.equals("thin")) {
-	        TopologyGenerator.generateRingLine(tpg, size);
+	        TopologyGenerator.generateRingLine(tpg, size, false);
 	        tpg.setDynamicEngine(new DynamicEngine(), type);
         } else if (toptype.equals("dense")){
-        	TopologyGenerator.generateCompleteGraph(tpg, size, .4, .4);	        
+        	TopologyGenerator.generateCompleteGraph(tpg, size, .4, .4, false);	        
 	        tpg.setDynamicEngine(new DynamicEngine(), type);
         } else if (toptype.equals("adversary")){
-        	TopologyGenerator.generateRingLine(tpg, size);
+        	TopologyGenerator.generateRingLine(tpg, size, false);
 	        tpg.setDynamicEngine(new DynamicEngine(), type);
         }
         

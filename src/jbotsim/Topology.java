@@ -147,7 +147,25 @@ public class Topology extends _Properties implements ClockListener{
         }
         return new Node();
     }
-
+    
+    /**
+     * Create a new instance of this type of node.
+     * @param modelName, size of topology
+     * @return a new instance of this type of node
+     */
+    public Node newInstanceOfModel(String modelName, int size){
+        try {
+            return (Node) getNodeModel(modelName).getDeclaredConstructor(String.class).newInstance(Integer.toString(size));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            System.err.println("(is your class of node public?)");
+        } catch (NullPointerException e) {
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return new Node();
+    }
+    
     public boolean isStarted() {
         return isStarted;
     }

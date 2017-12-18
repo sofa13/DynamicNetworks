@@ -25,15 +25,15 @@ public class CounterFlooding extends Node {
     boolean receivemsg = false;
     Message m = null;
     int k = 0;
-    int n = topo.topSize;
+    int n = 0;
 
     public CounterFlooding() {
 
         this.disableWireless();
     }
 
-    public CounterFlooding(int id) {
-        this.setID(id);
+    public CounterFlooding(String args) {
+        n = Integer.parseInt(args);
         this.disableWireless();
     }
 
@@ -192,13 +192,13 @@ public class CounterFlooding extends Node {
         tpg.setMessageEngine(new MessageEngine());
 
         if (toptype.equals("thin")) {
-	        TopologyGenerator.generateRingLine(tpg, size);
+	        TopologyGenerator.generateRingLine(tpg, size, true);
 	        tpg.setDynamicEngine(new DynamicEngine(), type);
         } else if (toptype.equals("dense")){
-        	TopologyGenerator.generateCompleteGraph(tpg, size, .4, .4);	        
+        	TopologyGenerator.generateCompleteGraph(tpg, size, .4, .4, true);	        
 	        tpg.setDynamicEngine(new DynamicEngine(), type);
         } else if (toptype.equals("adversary")){
-        	TopologyGenerator.generateRingLine(tpg, size);
+        	TopologyGenerator.generateRingLine(tpg, size, true);
 	        tpg.setDynamicEngine(new DynamicEngine(), type);
         }
         
